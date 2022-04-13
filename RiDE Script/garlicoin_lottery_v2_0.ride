@@ -1,0 +1,261 @@
+{-# STDLIB_VERSION 4 #-}
+{-# CONTENT_TYPE DAPP #-}
+{-# SCRIPT_TYPE ACCOUNT #-}
+
+# https://www.ncbi.nlm.nih.gov/books/NBK126161/
+# link to calculate probability and decimal
+
+let gameToken = base58'CF6K2g13kWwGaWtvobqfZ8P3HiTMziaijFbhERZHVkbQ'
+let gameMasterPublicKey = base58'BXTUWyQEjN4xNuHf673JTmy8ECipmC3HE2QoP2fjW1uu'
+let gameMasterPublicKeyTest = base58'BXTUWyQEjN4xNuHf673JTmy8ECipmC3HE2QoP2fjW1uu'
+let tokenAssetId = "CF6K2g13kWwGaWtvobqfZ8P3HiTMziaijFbhERZHVkbQ"
+let gameIndex = "GARLIC"
+let tokenAId = gameIndex + "_" + "f2MwrmN4fdsf432FV9kSe"
+let tokenBId = gameIndex + "_" + "f1MzwrmNdf434Ffsdfs-0"
+let tokenCId = gameIndex + "_" + "f3MzwrmN4widf434Ffsdw"
+let tokensPerPlay = 100000000
+let lotteryprobability = "_probability"
+let lotteryprobabilitydecimal = "_probability_decimal"
+let lotteryWinningAddress = gameIndex + "_winning_address"
+let lotteryPrice = "_price"
+let lotteryPrices =  gameIndex + "_" + "lottery_prices"
+let lotteryAssetId = gameIndex + "_" + "lottery_asset_id"
+let countOfPrices =  gameIndex + "_" + "garlic_count_prices"
+let gameSpinLabel = gameIndex + "_" + "SPIN_COUNTER"
+let allowSizeLottery = 3
+let totalPricesInPool = gameIndex + "_" +  "total_prizes_pool"
+
+func checkPermission(callerPublicKey:ByteVector) = callerPublicKey != gameMasterPublicKey
+func gameSumShaLabel(spin:Int) =  gameIndex +"_"  +  toString(spin) + "_SPIN_RANDOM_HASH"  
+func gameGetSumSha(spin: Int) = getString(this, gameSumShaLabel(spin))
+func gameSpinNumber() = getInteger(this, gameSpinLabel)
+let listRandomHash = ["V2F2ZXNMb3R0b1Yy",	"V2F2ZXNMb3R0b1Yy",	"V2F2ZXNMb3R0b1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"V2F2ZXNMb3Nzb1Yy",	"V2F2ZXNMb3Nzb1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"V2F2ZXNMb3Bwb1Yy",	"V2F2ZXNMb3Bwb1Yy",	"V2F2ZXNMb3Bwb1Yy",	"V2F2ZXNMb3Bwb1Yy",	"V2F2ZXNMb3Bwb1Yy",	"V2F2ZXNMb3Bwb1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"TWF2ZXNNb3Nzb1Yy",	"TWF2ZXNNb3Nzb1Yy",	"TWF2ZXNNb3Nzb1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"V2F2ZXNNb3Nzb1Yy",	"V2F2ZXNNb3Nzb1Yy",	"V2F2ZXNNb3Nzb1Yy",	"V2F2ZXNNb3Nzb1Yy",	"V2F2ZXNNb3Nzb1Yy",	"V2F2ZXNNb3Nzb1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"V2F2ZXNMb3R0b1Yy",	"V2F2ZXNMb3R0b1Yy",	"pdHlFeGNoYW5nZVYy",	"pdHlFeGNoYW5nZVYy",	"V2F2ZXNMb3Nzb1Yy",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNMb3Nzb1Yy",	"V2F2ZXNMb3Nzb1Yy",	"V2F2ZXNMb3Nzb1Yy",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNMb3R0b1Yy",	"V2F2ZXNMb3R0b1Yy",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI",	"TWF2ZXNNb3Nzb1Yy",	"TWF2ZXNNb3Nzb1Yy",	"TWF2ZXNNb3Nzb1Yy",	"V2F2ZXNUZWFtVjI",	"V2F2ZXNUZWFtVjI"]
+
+func randomizer(inv: Invocation, lastPlayHash: ByteVector) = {       
+    let rand = lastPlayHash + inv.transactionId + inv.callerPublicKey + lastBlock.generationSignature + toBytes(lastBlock.timestamp) + toBytes(lastBlock.height)
+    sha256(rand)
+}
+
+func getNumberDecimal(number: Int) = {
+    if(number == 1) then "0.0"
+    else if(number == 2) then "0.00"
+    else if(number == 3) then "0.000"
+    else if(number == 4) then "0.0000"
+    else if(number == 5) then "0.00000"
+    else if(number == 6) then "0.000000"
+    else if(number == 7) then "0.0000000"
+    else throw("exceed number")
+}
+
+func getPriceArray() = {
+    let currentPrices = match getString(this, lotteryPrices){
+        case a: String => a
+        case _: Unit => ""
+    }
+    let sizePrices = currentPrices.size()
+    if(sizePrices == 0)then{
+        []
+    }else{
+        let trimPrices = take(currentPrices, currentPrices.size() - 1)
+        let newArray = trimPrices.split(",")
+        newArray
+    }    
+}
+
+func getCurrentBalance() = {
+    assetBalance(this, fromBase58String(tokenAssetId))
+}
+
+func procedLottery(win: List[String], token: String) = { 
+    if(isDefined(token) || token != "") then{
+        let tokenProbability = getIntegerValue(this, token + lotteryprobability )    
+        let tokenProbabilityDecimal = getIntegerValue(this, token + lotteryprobabilitydecimal) 
+        let sizeOfWin = win.size()          
+        # # no price won yet
+        if(sizeOfWin == 1) then {
+            let randomNumber = getElement(win, 0)            
+            let convertedRandomNumber = fromBase64String(randomNumber)
+            let convertedDecimalNumber =  tokenProbabilityDecimal * 500            
+            let comparisonNumber =  convertedRandomNumber.toInt()  % convertedDecimalNumber                       
+            if(comparisonNumber < tokenProbability) then{
+                cons(token, win)
+            }
+            else{
+                win
+            }   
+        }else{
+            # return the win
+            win
+        }     
+    }  
+    else{
+        win      
+    }    
+}
+
+func convertAmountToDecimalString(tokenAmount: Int, decimalVal: Int) = {
+      let tokenAmountSize = tokenAmount.toString().size()    
+    if(tokenAmountSize > decimalVal) then
+    {
+        let sufixAmount = takeRight(tokenAmount.toString(), decimalVal)
+        let prefixNumber = take(tokenAmount.toString(), tokenAmount.toString().size() - decimalVal)
+        let finaResult = prefixNumber + "." + sufixAmount
+        finaResult
+    }
+    else if(tokenAmountSize == decimalVal) then {
+        let valTemp = (decimalVal - tokenAmountSize)
+        let finalResult = "0." + tokenAmount.toString()
+        finalResult
+    }
+    else
+    {
+        let diffPriceAndDecimal = (decimalVal - tokenAmountSize)
+        let prefixAmount = getNumberDecimal(diffPriceAndDecimal)
+        let finalResult = prefixAmount + tokenAmount.toString()
+        finalResult
+    }    
+}
+
+# @Callable(i)
+# func testSet ={
+#     let hash = i.tim
+# }
+
+@Callable(i)
+func setGarlicCoinLottery() = {
+    if(checkPermission(i.callerPublicKey)) then throw("initGame_FORBBIDEN") else {
+        let storedTokensValues = tokenAId + "," + tokenBId + "," + tokenCId + ","
+       [                   
+            IntegerEntry(tokenAId + lotteryprobability, 69),
+            IntegerEntry(tokenAId + lotteryPrice, 69),
+            IntegerEntry(tokenAId + lotteryprobabilitydecimal, 100),  
+            StringEntry(tokenAId + lotteryAssetId, tokenAssetId),
+            IntegerEntry(tokenBId + lotteryprobability, 69),
+            IntegerEntry(tokenBId + lotteryPrice, 6900000000),                                    
+            IntegerEntry(tokenBId + lotteryprobabilitydecimal, 10),  
+            StringEntry(tokenBId + lotteryAssetId, tokenAssetId),
+            IntegerEntry(tokenCId + lotteryprobability, 69),
+            IntegerEntry(tokenCId + lotteryPrice, 500000000),                                    
+            IntegerEntry(tokenCId + lotteryprobabilitydecimal, 1),  
+            StringEntry(tokenCId + lotteryAssetId, tokenAssetId),           
+            StringEntry(lotteryPrices, storedTokensValues),
+            IntegerEntry(countOfPrices, 3),
+            IntegerEntry(gameSpinLabel, 0)
+        ] 
+    }    
+}
+
+# startlotto trigger lottery in dApp
+@Callable(i)
+func startGarlicLotto() = {
+    let balance = getCurrentBalance()   
+    if(balance < 100) then {
+         throw("Not enought Amount")
+    }
+    else
+    {
+        if(size(i.payments) != 1)then{
+            throw("Payment not attached or there is more then 1 payment attached.")
+        }else{
+            let p = i.payments[0]
+            let totalBet = p.amount + i.fee
+            if(i.payments[0].assetId == gameToken) then{
+                match blockInfoByHeight(lastBlock.height - 1) {
+                    case previousBlock: BlockInfo => {   
+                        let lastSpin = match gameSpinNumber(){
+                            case sp: Int => sp
+                            case _: Unit =>  throw("Garlic lottery has not been initialed yet- missing spin")
+                        }                            
+                        let randomNumberToPickup = toInt(sha256(i.transactionId.take(16) + lastBlock.generationSignature.take(16))) % 17728
+                        let numberToPick = (toInt(toBytes(pow(randomNumberToPickup, 0, 2 , 0, 0, UP))) + lastSpin) % 64  
+                        let priceList = getPriceArray() 
+                        let randomHashToSelect = match gameGetSumSha(randomNumberToPickup){
+                            case hash: String => hash
+                            case _ => listRandomHash[numberToPick]
+                        }                                                    
+                        let randomHash =  randomizer(i, toBytes(randomHashToSelect))
+                        # calculate random number
+                        let randNumber = randomHash.toBase64String()  
+                        let tes = fromBase64String(randNumber)
+                        let listWinningPrices = [randNumber]                   
+                        let winningToken = FOLD<3>(priceList, listWinningPrices, procedLottery)                   
+                        let sizeOfWinPrices = winningToken.size()    
+                        let divider =  (500 * 1)       
+                        let tas = tes.toInt() % divider
+                        if(sizeOfWinPrices == 1) then {
+                            [
+                                StringEntry("message", "<h1>Better luck next time!</h1><br><p>Invite more friends to keep playing!<p>"),
+                                StringEntry(gameSumShaLabel(numberToPick),  randomHash.toBase64String()),                       
+                                IntegerEntry(toString(lastSpin +1 ) + "_last_hash_number",tas),
+                                IntegerEntry(toString(lastSpin + 1) + "_last_selected_number",numberToPick),
+                                IntegerEntry(gameSpinLabel,lastSpin + 1)                               
+                            ]
+                        }
+                        else{      
+                            let token = getElement(winningToken, 0)     
+                            let callerAddress = toBase58String(i.caller.bytes)  
+                            # update the current amount of the prices   
+                            let addressBalance = getCurrentBalance()                
+                            if(addressBalance == 0) then
+                            {
+                                throw("Not Enough Garlic Coin")
+                            }
+                            else
+                            {
+                                if(token == tokenAId) then
+                                {
+                                    let lotteryPriceTokenA = match getInteger(this, tokenAId + lotteryPrice){
+                                        case t : Int => t
+                                        case _: Unit => 0
+                                    }
+                                    let winningAmount = (lotteryPriceTokenA * addressBalance )  / 100 
+                                    let tokenDecimal = match assetInfo(fromBase58String(tokenAssetId)){
+                                        case asset: Asset => asset.decimals
+                                        case _: Unit => throw("Can't find asset")
+                                    }
+                                    let convertedPrice = convertAmountToDecimalString(winningAmount, tokenDecimal)                                                                  
+                                    [                                              
+                                        StringEntry(token + lotteryWinningAddress, callerAddress),
+                                        StringEntry(gameSumShaLabel(numberToPick),  randomHash.toBase64String()),
+                                        IntegerEntry(gameSpinLabel,lastSpin + 1),
+                                        StringEntry("message", "<h1>Congratulations you won!</h1><br><p>You have won "+ convertedPrice +" "+ tokenAssetId +"!<p>"),
+                                        ScriptTransfer(i.caller , winningAmount , fromBase58String(tokenAssetId))     
+                                    ]      
+                                }
+                                else 
+                                {     
+                                    let lotteryPriceTokenB = match getInteger(this, token + lotteryPrice){
+                                    case t : Int => t
+                                    case _: Unit => 0
+                                    }        
+                                    let tokenDecimal = match assetInfo(fromBase58String(tokenAssetId)){
+                                        case asset: Asset => asset.decimals
+                                        case _: Unit => throw("Can't find asset")
+                                    }
+                                    let convertedPrice = convertAmountToDecimalString(lotteryPriceTokenB, tokenDecimal)                                                                                               
+                                    [                  
+                                        StringEntry(token + lotteryWinningAddress, callerAddress),
+                                        StringEntry(gameSumShaLabel(numberToPick),  randomHash.toBase64String()),
+                                        IntegerEntry(gameSpinLabel,lastSpin + 1),
+                                        StringEntry("message", "<h1>Congratulations you won!</h1><br><p>You have won "+ convertedPrice +" "+tokenAssetId+"!<p>"),
+                                        ScriptTransfer(i.caller , lotteryPriceTokenB , fromBase58String(tokenAssetId))           
+                                    ]   
+                                }                           
+                            }    
+                        }    
+                    }
+                    case _ => throw("Last block does not exist.")  
+                }              
+            }else{
+                throw("payment is not in correct assetId "+ gameToken.toBase58String()+".")
+            }
+        }
+    } 
+}
+
+@Verifier(tx)
+func verify() = {
+    match(tx) {
+        case _ => sigVerify(tx.bodyBytes, tx.proofs[0], tx.senderPublicKey)
+    }
+}
