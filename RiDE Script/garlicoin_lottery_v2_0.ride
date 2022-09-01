@@ -75,7 +75,7 @@ func procedLottery(win: List[String], token: String) = {
         if(sizeOfWin == 1) then {
             let randomNumber = getElement(win, 0)            
             let convertedRandomNumber = fromBase64String(randomNumber)
-            let convertedDecimalNumber =  tokenProbabilityDecimal * 500            
+            let convertedDecimalNumber =  tokenProbabilityDecimal * 1000            
             let comparisonNumber =  convertedRandomNumber.toInt()  % convertedDecimalNumber                       
             if(comparisonNumber < tokenProbability) then{
                 cons(token, win)
@@ -126,15 +126,15 @@ func setGarlicCoinLottery() = {
     if(checkPermission(i.callerPublicKey)) then throw("initGame_FORBBIDEN") else {
         let storedTokensValues = tokenAId + "," + tokenBId + "," + tokenCId + ","
        [                   
-            IntegerEntry(tokenAId + lotteryprobability, 69),
+            IntegerEntry(tokenAId + lotteryprobability, 30),
             IntegerEntry(tokenAId + lotteryPrice, 69),
             IntegerEntry(tokenAId + lotteryprobabilitydecimal, 100),  
             StringEntry(tokenAId + lotteryAssetId, tokenAssetId),
-            IntegerEntry(tokenBId + lotteryprobability, 69),
+            IntegerEntry(tokenBId + lotteryprobability, 83),
             IntegerEntry(tokenBId + lotteryPrice, 6900000000),                                    
             IntegerEntry(tokenBId + lotteryprobabilitydecimal, 10),  
             StringEntry(tokenBId + lotteryAssetId, tokenAssetId),
-            IntegerEntry(tokenCId + lotteryprobability, 69),
+            IntegerEntry(tokenCId + lotteryprobability, 66),
             IntegerEntry(tokenCId + lotteryPrice, 500000000),                                    
             IntegerEntry(tokenCId + lotteryprobabilitydecimal, 1),  
             StringEntry(tokenCId + lotteryAssetId, tokenAssetId),           
